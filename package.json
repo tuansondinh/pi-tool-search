@@ -1,0 +1,33 @@
+{
+  "name": "pi-tool-search",
+  "version": "0.3.0",
+  "description": "Hide all tools behind a manifest-aware tool_search — LLM enables tools by name on demand",
+  "author": "Tuan Son <tuansondinh96@gmail.com>",
+  "keywords": [
+    "pi",
+    "pi-package",
+    "pi-extension",
+    "pi-coding-agent",
+    "tools",
+    "tool-search",
+    "manifest"
+  ],
+  "type": "module",
+  "files": [
+    "extensions/",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "pi": {
+    "extensions": [
+      "./extensions/index.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": ">=0.57.0"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@mariozechner/pi-coding-agent": "^0.69.0"
+  }
+}
