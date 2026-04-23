@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.4] - 2026-04-23
+
+### Other
+- Clarify core defaults and token-saving purpose
+
 ## [0.3.3] - 2026-04-23
 
 ### Bug Fixes
