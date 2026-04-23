@@ -10,7 +10,21 @@
     "pi-coding-agent",
     "tools",
     "tool-search",
-    "manifest"
+    "manifest",
+    "lazy-tools",
+    "on-demand",
+    "tool-manager",
+    "tool-registry",
+    "context-window",
+    "token-efficient",
+    "llm",
+    "agent",
+    "coding-agent",
+    "tool-filter",
+    "tool-discovery",
+    "dynamic-tools",
+    "extension",
+    "installer"
   ],
   "type": "module",
   "files": [
