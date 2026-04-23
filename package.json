@@ -1,6 +1,6 @@
 {
   "name": "pi-tool-search",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Hide all tools behind a manifest-aware tool_search — LLM enables tools by name on demand",
   "author": "Tuan Son <tuansondinh96@gmail.com>",
   "keywords": [

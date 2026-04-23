@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.5] - 2026-04-23
+
+### Other
+- Add `pi install npm:pi-tool-search` command to README
+
 ## [0.3.4] - 2026-04-23
 
 ### Other

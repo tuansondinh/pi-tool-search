@@ -31,15 +31,23 @@ Available tools:
 Pass one or more exact tool names. After enabling, call those tools directly in next turn.
 ```
 
-## Usage
+## Install
 
-Install via pi or point `settings.json` to the local path:
+```bash
+pi install npm:pi-tool-search
+```
+
+Or configure manually in `settings.json`:
 
 ```json
 {
   "extensions": ["/path/to/pi-tool-search"]
 }
 ```
+
+## Usage
+
+Once installed, all tools except core defaults (`read`, `write`, `edit`, `bash`, `grep`, `find`) are hidden behind `tool_search`. Call `tool_search` with tool names to unlock them on demand.
 
 ## Configuration
 
