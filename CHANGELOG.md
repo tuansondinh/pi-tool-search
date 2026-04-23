@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.3] - 2026-04-23
+
+### Bug Fixes
+- Refresh active tools on every `turn_start`, not only fresh user prompts, so unlocked tools stay available during agent-loop continuations
+- Queue hidden steer hint after successful `tool_search` so agent can continue/retry without waiting for another user message
+- Stop showing visible retry guidance in `tool_search` results and narrow hidden retry hint so successful same-turn tool calls are not repeated
+
+### Other
+- Document same-response activation caveat and recovery behavior in `README.md`
+
 ## [0.3.2] - 2026-04-23
 
 ### Bug Fixes
