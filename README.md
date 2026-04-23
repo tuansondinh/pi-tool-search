@@ -1,14 +1,14 @@
 # pi-tool-search
 
-Hide all tools behind a manifest-aware `tool_search` gate. The LLM sees a single tool whose description embeds a compact name + one-liner manifest of every available tool. It calls `tool_search` with the names it needs; those tools become active for the rest of the session.
+Hide non-core tools behind a manifest-aware `tool_search` gate. Core tools stay enabled by default; everything else can be unlocked on demand. Purpose: reduce prompt context / token usage by avoiding full tool schemas for rarely used tools.
 
 ## Why
 
-Full tool schemas are expensive (~500 bytes each). With 50 tools that's ~25KB of schema noise every turn. This extension reduces that to ~4KB — a compact manifest in the `tool_search` description, with schemas only loaded when explicitly unlocked.
+Full tool schemas are expensive (~500 bytes each). With 50 tools that's ~25KB of schema noise every turn. Purpose of this extension is to reduce prompt context / token usage: keep core tools active, replace rest with compact manifest in `tool_search`, and only load full schemas when explicitly unlocked.
 
 ## How it works
 
-- **`session_start`** — snapshots all tools into compact manifest, seeds `unlocked` set with core tools
+- **`session_start`** — snapshots all tools into compact manifest, seeds `unlocked` set with core tools enabled by default (`read`, `write`, `edit`, `bash`, `grep`, `find`)
 - **`turn_start`** — rebuilds manifest before every LLM call, re-registers `tool_search` with fresh description, re-applies active tools for agent-loop continuations too
 - **`tool_search.execute`** — validates names, adds to `unlocked` set, persists across turns, queues hidden steer hint so agent can continue without waiting for another user message
 
@@ -56,7 +56,7 @@ Add a `toolSearch` block to `settings.json`:
 
 | Key | Default | Description |
 |---|---|---|
-| `alwaysEnabled` | `[]` | Tool names to pre-unlock beyond the defaults (`read`, `write`, `edit`, `bash`) |
+| `alwaysEnabled` | `[]` | Tool names to pre-unlock beyond default core tools (`read`, `write`, `edit`, `bash`, `grep`, `find`) |
 | `showStatus` | `true` | Show `N / total tools` in the footer status bar |
 
 Unknown names in `alwaysEnabled` are silently ignored until they appear in manifest. Read at each `session_start`, so changes take effect on next session without reinstall.
