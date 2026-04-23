@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.1] - 2026-04-23
+
+### Other
+- Add repository field to package.json
+
 ## 0.3.0
 
 - Renamed from `pi-lazy-tools` to `pi-tool-search`

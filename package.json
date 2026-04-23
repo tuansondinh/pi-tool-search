@@ -1,6 +1,6 @@
 {
   "name": "pi-tool-search",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Hide all tools behind a manifest-aware tool_search — LLM enables tools by name on demand",
   "author": "Tuan Son <tuansondinh96@gmail.com>",
   "keywords": [
@@ -25,6 +25,10 @@
   },
   "peerDependencies": {
     "@mariozechner/pi-coding-agent": ">=0.57.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tuansondinh/pi-tool-search"
   },
   "license": "MIT",
   "devDependencies": {
