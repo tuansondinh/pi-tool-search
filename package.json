@@ -1,6 +1,6 @@
 {
   "name": "pi-tool-search",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Hide all tools behind a manifest-aware tool_search — LLM enables tools by name on demand",
   "author": "Tuan Son <tuansondinh96@gmail.com>",
   "keywords": [
@@ -11,20 +11,17 @@
     "tools",
     "tool-search",
     "manifest",
-    "lazy-tools",
+    "lazy-loading",
     "on-demand",
     "tool-manager",
     "tool-registry",
     "context-window",
-    "token-efficient",
-    "llm",
-    "agent",
-    "coding-agent",
+    "token-saving",
+    "tool-gating",
     "tool-filter",
     "tool-discovery",
     "dynamic-tools",
-    "extension",
-    "installer"
+    "context"
   ],
   "type": "module",
   "files": [

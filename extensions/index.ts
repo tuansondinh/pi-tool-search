@@ -20,7 +20,7 @@ import { Type } from "@sinclair/typebox";
 import { readFileSync } from "fs";
 import { join } from "path";
 
-const CORE_TOOLS = ["read", "write", "edit", "bash"];
+const CORE_TOOLS = ["read", "write", "edit", "bash", "grep", "find"];
 
 interface UserConfig {
   alwaysEnabled: string[];
@@ -60,17 +60,31 @@ export default function toolSearchExtension(pi: ExtensionAPI) {
   }
 
   function buildDescription(): string {
-    const lines = manifest
+    const active = manifest.filter(t => unlocked.has(t.name));
+    const hidden = manifest.filter(t => !unlocked.has(t.name));
+
+    const activeLines = active
+      .map(t => `  ${t.name}: ${t.blurb}`)
+      .join("\n");
+    const hiddenLines = hidden
       .map(t => `  ${t.name}: ${t.blurb}`)
       .join("\n");
 
-    return (
-      `Enable tools by name before calling them. ` +
-      `All tools below are hidden until you enable them here.\n\n` +
-      `Available tools:\n${lines}\n\n` +
-      `Pass one or more exact tool names. ` +
-      `After enabling, call those tools directly.`
-    );
+    const parts: string[] = [];
+
+    parts.push(`Enable tools by name before calling them. All tools below are hidden until you enable them here.`);
+
+    if (active.length) {
+      parts.push(`Already active (do NOT call tool_search for these):\n${activeLines}`);
+    }
+
+    if (hidden.length) {
+      parts.push(`Available tools (hidden — enable via tool_search):\n${hiddenLines}`);
+    }
+
+    parts.push(`Pass one or more exact tool names. After enabling, call those tools directly.`);
+
+    return parts.join("\n\n");
   }
 
   function registerToolSearch() {

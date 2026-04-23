@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.2] - 2026-04-23
+
+### Bug Fixes
+- Split `tool_search` description into "Already active" and "Hidden" sections so LLM skips redundant enable calls
+- Add `grep` and `find` to default core tools (always enabled alongside `read`, `write`, `edit`, `bash`)
+
 ## [0.3.1] - 2026-04-23
 
 ### Other
