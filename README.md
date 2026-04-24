@@ -57,7 +57,7 @@ Add a `toolSearch` block to `settings.json`:
 {
   "toolSearch": {
     "alwaysEnabled": ["lsp", "grep", "find"],
-    "showStatus": true
+    "showToolSearchFooterStatus": true
   }
 }
 ```
@@ -65,9 +65,9 @@ Add a `toolSearch` block to `settings.json`:
 | Key | Default | Description |
 |---|---|---|
 | `alwaysEnabled` | `[]` | Tool names to pre-unlock beyond default core tools (`read`, `write`, `edit`, `bash`, `grep`, `find`) |
-| `showStatus` | `true` | Show `N / total tools` in the footer status bar |
+| `showToolSearchFooterStatus` | `true` | Show tool-search `N / total tools` in the footer status bar |
 
-Unknown names in `alwaysEnabled` are silently ignored until they appear in manifest. Read at each `session_start`, so changes take effect on next session without reinstall.
+Unknown names in `alwaysEnabled` are silently ignored until they appear in manifest. `alwaysEnabled` is read at each `session_start`, so changes take effect on next session without reinstall. `showToolSearchFooterStatus` is re-read on refresh; set it to `false` to clear/hide the tool-search footer status.
 
 ## Same-response activation caveat
 

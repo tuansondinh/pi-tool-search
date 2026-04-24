@@ -11,7 +11,8 @@
  *  - tool_search.execute → validate names, add to unlocked set, call setActiveTools, queue hidden retry hint
  *
  * User config (settings.json):
- *  "toolSearch": { "alwaysEnabled": ["lsp", "grep"], "showStatus": true }
+ *  "toolSearch": { "alwaysEnabled": ["lsp", "grep"], "showToolSearchFooterStatus": true }
+ *  Set "showToolSearchFooterStatus": false to hide the tool-search footer status line.
  */
 
 import { getAgentDir } from "@mariozechner/pi-coding-agent";
@@ -24,7 +25,7 @@ const CORE_TOOLS = ["read", "write", "edit", "bash", "grep", "find"];
 
 interface UserConfig {
   alwaysEnabled: string[];
-  showStatus: boolean;
+  showToolSearchFooterStatus: boolean;
 }
 
 function readUserConfig(): UserConfig {
@@ -35,10 +36,10 @@ function readUserConfig(): UserConfig {
       alwaysEnabled: Array.isArray(s.alwaysEnabled)
         ? s.alwaysEnabled.filter((n: unknown): n is string => typeof n === "string")
         : [],
-      showStatus: s.showStatus !== false,
+      showToolSearchFooterStatus: s.showToolSearchFooterStatus !== false && s.showFooterStatus !== false && s.showStatus !== false,
     };
   } catch {}
-  return { alwaysEnabled: [], showStatus: true };
+  return { alwaysEnabled: [], showToolSearchFooterStatus: true };
 }
 
 export default function toolSearchExtension(pi: ExtensionAPI) {
@@ -48,7 +49,7 @@ export default function toolSearchExtension(pi: ExtensionAPI) {
   // Names enabled so far this session (persists across turns)
   const unlocked = new Set<string>();
 
-  let showStatus = true;
+  let showToolSearchFooterStatus = true;
 
   // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -91,13 +92,19 @@ IMPORTANT: After calling tool_search, STOP and wait for the result. Do NOT call 
     return parts.join("\n\n");
   }
 
-  function refreshActiveTools(ctx?: { ui: { setStatus(id: string, content: string): void } }) {
+  function refreshActiveTools(ctx?: { ui: { setStatus(id: string, content: string | undefined): void } }) {
+    showToolSearchFooterStatus = readUserConfig().showToolSearchFooterStatus;
+
     buildManifest();
     registerToolSearch();
     pi.setActiveTools(["tool_search", ...unlocked]);
 
-    if (showStatus && ctx) {
+    if (!ctx) return;
+
+    if (showToolSearchFooterStatus) {
       ctx.ui.setStatus("tool-search", `${unlocked.size} / ${manifest.length + 1} tools`);
+    } else {
+      ctx.ui.setStatus("tool-search", undefined);
     }
   }
 
@@ -166,7 +173,7 @@ IMPORTANT: After calling tool_search, STOP and wait for the result. Do NOT call 
     unlocked.clear();
 
     const config = readUserConfig();
-    showStatus = config.showStatus;
+    showToolSearchFooterStatus = config.showToolSearchFooterStatus;
     for (const name of [...CORE_TOOLS, ...config.alwaysEnabled]) unlocked.add(name);
 
     refreshActiveTools(ctx);

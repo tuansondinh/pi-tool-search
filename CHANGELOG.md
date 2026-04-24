@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.6] - 2026-04-24
+
+### Bug Fixes
+- Clear footer status when `toolSearch.showToolSearchFooterStatus` is `false`, and re-read setting each refresh so settings changes take effect without stale status.
+- Add explicit `showToolSearchFooterStatus` config name with backward compatibility for older status keys.
+
 ## [0.3.5] - 2026-04-23
 
 ### Other
