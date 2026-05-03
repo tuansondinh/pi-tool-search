@@ -10,36 +10,60 @@
  *  - turn_start          → rebuild manifest before every LLM call, re-register tool_search, setActiveTools
  *  - tool_search.execute → validate names, add to unlocked set, call setActiveTools, queue hidden retry hint
  *
- * User config (settings.json):
- *  "toolSearch": { "alwaysEnabled": ["lsp", "grep"], "showToolSearchFooterStatus": true }
+ *  "toolSearch": { "alwaysEnabled": ["lsp", "grep"], "showToolSearchFooterStatus": true, "showStartupNotification": true }
  *  Set "showToolSearchFooterStatus": false to hide the tool-search footer status line.
+ *  Set "showStartupNotification": false to hide the startup notification; omitted follows quietStartup.
  */
 
-import { getAgentDir } from "@mariozechner/pi-coding-agent";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import { getAgentDir, SettingsManager } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext, SessionStartEvent } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { readFileSync } from "fs";
-import { join } from "path";
 
 const CORE_TOOLS = ["read", "write", "edit", "bash", "grep", "find"];
 
 interface UserConfig {
   alwaysEnabled: string[];
   showToolSearchFooterStatus: boolean;
+  showStartupNotification: boolean;
 }
 
-function readUserConfig(): UserConfig {
+function getToolSearchSettings(settings: unknown): Record<string, unknown> {
+  if (typeof settings !== "object" || settings === null) {
+    return {};
+  }
+
+  const value = (settings as Record<string, unknown>).toolSearch;
+  if (typeof value !== "object" || value === null) {
+    return {};
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function readUserConfig(cwd = process.cwd()): UserConfig {
   try {
-    const raw = readFileSync(join(getAgentDir(), "settings.json"), "utf-8");
-    const s = JSON.parse(raw)?.toolSearch ?? {};
+    const manager = SettingsManager.create(cwd, getAgentDir());
+    const globalSettings = manager.getGlobalSettings();
+    const projectSettings = manager.getProjectSettings();
+    const s = {
+      ...getToolSearchSettings(globalSettings),
+      ...getToolSearchSettings(projectSettings),
+    };
+
+    const quietStartup = manager.getQuietStartup();
+    const showStartupNotification = typeof s.showStartupNotification === "boolean"
+      ? s.showStartupNotification
+      : quietStartup === false;
+
     return {
       alwaysEnabled: Array.isArray(s.alwaysEnabled)
         ? s.alwaysEnabled.filter((n: unknown): n is string => typeof n === "string")
         : [],
       showToolSearchFooterStatus: s.showToolSearchFooterStatus !== false && s.showFooterStatus !== false && s.showStatus !== false,
+      showStartupNotification,
     };
   } catch {}
-  return { alwaysEnabled: [], showToolSearchFooterStatus: true };
+  return { alwaysEnabled: [], showToolSearchFooterStatus: true, showStartupNotification: true };
 }
 
 export default function toolSearchExtension(pi: ExtensionAPI) {
@@ -92,8 +116,20 @@ IMPORTANT: After calling tool_search, STOP and wait for the result. Do NOT call 
     return parts.join("\n\n");
   }
 
-  function refreshActiveTools(ctx?: { ui: { setStatus(id: string, content: string | undefined): void } }) {
-    showToolSearchFooterStatus = readUserConfig().showToolSearchFooterStatus;
+  function activeToolCount(): number {
+    return 1 + manifest.filter(t => unlocked.has(t.name)).length;
+  }
+
+  function hiddenToolCount(): number {
+    return manifest.filter(t => !unlocked.has(t.name)).length;
+  }
+
+  function totalToolCount(): number {
+    return manifest.length + 1;
+  }
+
+  function refreshActiveTools(ctx?: ExtensionContext) {
+    showToolSearchFooterStatus = readUserConfig(ctx?.cwd).showToolSearchFooterStatus;
 
     buildManifest();
     registerToolSearch();
@@ -102,7 +138,7 @@ IMPORTANT: After calling tool_search, STOP and wait for the result. Do NOT call 
     if (!ctx) return;
 
     if (showToolSearchFooterStatus) {
-      ctx.ui.setStatus("tool-search", `${unlocked.size} / ${manifest.length + 1} tools`);
+      ctx.ui.setStatus("tool-search", `${activeToolCount()} / ${totalToolCount()} tools`);
     } else {
       ctx.ui.setStatus("tool-search", undefined);
     }
@@ -137,7 +173,7 @@ IMPORTANT: After calling tool_search, STOP and wait for the result. Do NOT call 
         }
 
         valid.forEach(n => unlocked.add(n));
-        refreshActiveTools();
+        refreshActiveTools(ctx);
 
         if (valid.length) {
           pi.sendMessage({
@@ -169,19 +205,28 @@ IMPORTANT: After calling tool_search, STOP and wait for the result. Do NOT call 
 
   // ── lifecycle ──────────────────────────────────────────────────────────────
 
-  pi.on("session_start", (_event, ctx) => {
+  function shouldNotifyStartup(event: SessionStartEvent, ctx: ExtensionContext, config: UserConfig): boolean {
+    return ctx.hasUI === true &&
+      event.reason === "startup" &&
+      config.showStartupNotification === true &&
+      hiddenToolCount() > 0;
+  }
+
+  pi.on("session_start", (event, ctx) => {
     unlocked.clear();
 
-    const config = readUserConfig();
+    const config = readUserConfig(ctx.cwd);
     showToolSearchFooterStatus = config.showToolSearchFooterStatus;
     for (const name of [...CORE_TOOLS, ...config.alwaysEnabled]) unlocked.add(name);
 
     refreshActiveTools(ctx);
 
-    ctx.ui.notify(
-      `pi-tool-search: ${manifest.length} tools hidden behind tool_search`,
-      "info",
-    );
+    if (shouldNotifyStartup(event, ctx, config)) {
+      ctx.ui.notify(
+        `pi-tool-search: ${hiddenToolCount()} tools hidden behind tool_search`,
+        "info",
+      );
+    }
   });
 
   pi.on("turn_start", (_event, ctx) => {

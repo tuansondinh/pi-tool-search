@@ -57,7 +57,8 @@ Add a `toolSearch` block to `settings.json`:
 {
   "toolSearch": {
     "alwaysEnabled": ["lsp", "grep", "find"],
-    "showToolSearchFooterStatus": true
+    "showToolSearchFooterStatus": true,
+    "showStartupNotification": true
   }
 }
 ```
@@ -66,8 +67,9 @@ Add a `toolSearch` block to `settings.json`:
 |---|---|---|
 | `alwaysEnabled` | `[]` | Tool names to pre-unlock beyond default core tools (`read`, `write`, `edit`, `bash`, `grep`, `find`) |
 | `showToolSearchFooterStatus` | `true` | Show tool-search `N / total tools` in the footer status bar |
+| `showStartupNotification` | follows `quietStartup` | Show the `tools hidden behind tool_search` startup notification. Set `false` to always hide or `true` to always show |
 
-Unknown names in `alwaysEnabled` are silently ignored until they appear in manifest. `alwaysEnabled` is read at each `session_start`, so changes take effect on next session without reinstall. `showToolSearchFooterStatus` is re-read on refresh; set it to `false` to clear/hide the tool-search footer status.
+Unknown names in `alwaysEnabled` are silently ignored until they appear in manifest. `alwaysEnabled` is read at each `session_start`, so changes take effect on next session without reinstall. `showToolSearchFooterStatus` is re-read on refresh; set it to `false` to clear/hide the tool-search footer status. `showStartupNotification` is read on session start and defaults to hidden when Pi's `quietStartup` is enabled.
 
 ## Same-response activation caveat
 
